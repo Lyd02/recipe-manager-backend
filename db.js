@@ -5,12 +5,24 @@ dotenv.config();
 
 const { Pool } = pg;
 
-const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'recipe_db',
-  password: 'Admin@12345',
-  port: 5432,
-});
+let pool;
+
+try {
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  });
+  
+  // Test connection
+  pool.query('SELECT NOW()', (err) => {
+    if (err) {
+      console.error('Database connection error:', err);
+    } else {
+      console.log('Database connected successfully');
+    }
+  });
+} catch (error) {
+  console.error('Failed to create database pool:', error);
+}
 
 export default pool;
